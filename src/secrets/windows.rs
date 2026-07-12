@@ -12,18 +12,6 @@ pub fn add(secret: &Secret) -> Result<(), SecretError> {
     ))
 }
 
-/// Generates a random 64-character password and stores it in the secure
-/// credential store under the given `name`.
-///
-/// # Errors
-/// Returns the same errors as [`add`], most notably
-/// [`SecretError::AlreadyExists`] if a secret with this name already exists.
-pub fn create_random(name: &str) -> Result<Secret, SecretError> {
-    Err(SecretError::PlatformError(
-        "Not implemented for Windows".to_string(),
-    ))
-}
-
 /// Retrieves a secret's value from the secure credential store by its name.
 ///
 /// # Errors
@@ -57,21 +45,6 @@ pub fn remove(name: &str) -> Result<(), SecretError> {
 /// - [`SecretError::NotFound`] if no secret with this name exists.
 /// - [`SecretError::PlatformError`] if the underlying platform API call fails.
 pub fn update(secret: &Secret) -> Result<(), SecretError> {
-    Err(SecretError::PlatformError(
-        "Not implemented for Windows".to_string(),
-    ))
-}
-
-/// Updates the secret if it already exists in the secure credential store,
-/// or creates it if it doesn't.
-///
-/// Attempts [`update`] first; if that fails with [`SecretError::NotFound`],
-/// falls back to [`add`]. Any other error from `update` is returned as-is.
-///
-/// # Errors
-/// Returns any error from [`update`] or [`add`] other than
-/// `SecretError::NotFound` (which triggers the fallback to `add`).
-pub fn upsert(secret: &Secret) -> Result<(), SecretError> {
     Err(SecretError::PlatformError(
         "Not implemented for Windows".to_string(),
     ))

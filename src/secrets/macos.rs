@@ -1,4 +1,3 @@
-use crate::passwords;
 use crate::secrets::{Secret, SecretError};
 use objc2_core_foundation::*;
 use objc2_security::*;
@@ -43,21 +42,6 @@ pub fn add(secret: &Secret) -> Result<(), SecretError> {
         return Err(SecretError::PlatformError("SecItemAdd failed".to_string()));
     }
     Ok(())
-}
-
-/// Generates a random 64-character password and stores it in the secure
-/// credential store under the given `name`.
-///
-/// # Errors
-/// Returns the same errors as [`add`], most notably
-/// [`SecretError::AlreadyExists`] if a secret with this name already exists.
-pub fn create_random(name: &str) -> Result<Secret, SecretError> {
-    let generator = passwords::Generator::default();
-    let secret = Secret::new(name.to_string(), generator.generate(64));
-    match add(&secret) {
-        Ok(_) => Ok(secret),
-        Err(e) => Err(e),
-    }
 }
 
 /// Retrieves a secret's value from the secure credential store by its name.
@@ -198,21 +182,4 @@ pub fn update(secret: &Secret) -> Result<(), SecretError> {
         ));
     }
     Ok(())
-}
-
-/// Updates the secret if it already exists in the secure credential store,
-/// or creates it if it doesn't.
-///
-/// Attempts [`update`] first; if that fails with [`SecretError::NotFound`],
-/// falls back to [`add`]. Any other error from `update` is returned as-is.
-///
-/// # Errors
-/// Returns any error from [`update`] or [`add`] other than
-/// `SecretError::NotFound` (which triggers the fallback to `add`).
-pub fn upsert(secret: &Secret) -> Result<(), SecretError> {
-    match update(secret) {
-        Ok(_) => Ok(()),
-        Err(SecretError::NotFound) => add(secret),
-        Err(e) => Err(e),
-    }
 }

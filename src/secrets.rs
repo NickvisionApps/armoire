@@ -30,6 +30,7 @@
 //! Avoid logging `Secret` values directly (e.g. via `{:?}`) in contexts
 //! where logs may be persisted or exposed.
 
+use crate::passwords;
 use serde::{Deserialize, Serialize};
 
 #[cfg(target_os = "linux")]
@@ -139,6 +140,38 @@ impl Secret {
     /// value outside of its intended use.
     pub fn value(&self) -> &str {
         &self.value
+    }
+}
+
+/// Generates a random 64-character password and stores it in the secure
+/// credential store under the given `name`.
+///
+/// # Errors
+/// Returns the same errors as [`add`], most notably
+/// [`SecretError::AlreadyExists`] if a secret with this name already exists.
+pub fn create_random(name: &str) -> Result<Secret, SecretError> {
+    let generator = passwords::Generator::default();
+    let secret = Secret::new(name.to_string(), generator.generate(64));
+    match add(&secret) {
+        Ok(_) => Ok(secret),
+        Err(e) => Err(e),
+    }
+}
+
+/// Updates the secret if it already exists in the secure credential store,
+/// or creates it if it doesn't.
+///
+/// Attempts [`update`] first; if that fails with [`SecretError::NotFound`],
+/// falls back to [`add`]. Any other error from `update` is returned as-is.
+///
+/// # Errors
+/// Returns any error from [`update`] or [`add`] other than
+/// `SecretError::NotFound` (which triggers the fallback to `add`).
+pub fn upsert(secret: &Secret) -> Result<(), SecretError> {
+    match update(secret) {
+        Ok(_) => Ok(()),
+        Err(SecretError::NotFound) => add(secret),
+        Err(e) => Err(e),
     }
 }
 
