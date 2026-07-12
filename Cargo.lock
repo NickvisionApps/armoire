@@ -7,6 +7,8 @@ name = "armoire"
 version = "0.1.0"
 dependencies = [
  "bitflags",
+ "gio",
+ "glib",
  "libsecret",
  "objc2-core-foundation",
  "objc2-security",
