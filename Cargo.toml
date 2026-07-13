@@ -1,9 +1,13 @@
 [package]
 name = "armoire"
 version = "0.1.0"
+authors = ["Nick Logozzo <nlogozzo225@gmail.com>"]
 edition = "2024"
 build = "build.rs"
+readme = "README.md"
+license = "MIT"
 description = "A cross-platform library for working with desktop secrets."
+repository = "https://github.com/NickvisionApps/armoire"
 keywords = ["password", "credentials", "keychain", "secrets", "security"]
 categories = ["authentication", "cryptography"]
 
