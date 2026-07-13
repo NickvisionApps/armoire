@@ -3,7 +3,7 @@ name = "armoire"
 version = "0.1.0"
 edition = "2024"
 build = "build.rs"
-description = "A cross-platform credential and secret manager with OS-native secure storage."
+description = "A cross-platform library for working with desktop secrets."
 keywords = ["password", "credentials", "keychain", "secrets", "security"]
 categories = ["authentication", "cryptography"]
 
