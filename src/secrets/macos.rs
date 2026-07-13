@@ -39,7 +39,10 @@ pub fn add(secret: &Secret) -> Result<(), SecretError> {
     if status == errSecDuplicateItem {
         return Err(SecretError::AlreadyExists);
     } else if status != errSecSuccess {
-        return Err(SecretError::PlatformError("SecItemAdd failed".to_string()));
+        return Err(SecretError::PlatformError(format!(
+            "SecItemAdd failed with status: {}",
+            status
+        )));
     }
     Ok(())
 }
@@ -78,9 +81,10 @@ pub fn get(name: &str) -> Result<Secret, SecretError> {
     if status == errSecItemNotFound {
         return Err(SecretError::NotFound);
     } else if status != errSecSuccess || result.is_null() {
-        return Err(SecretError::PlatformError(
-            "SecItemCopyMatching failed".to_string(),
-        ));
+        return Err(SecretError::PlatformError(format!(
+            "SecItemCopyMatching failed with status: {}",
+            status
+        )));
     }
     let owned =
         unsafe { CFRetained::from_raw(std::ptr::NonNull::new(result as *mut CFType).unwrap()) };
@@ -120,9 +124,10 @@ pub fn remove(name: &str) -> Result<(), SecretError> {
     if status == errSecItemNotFound {
         return Err(SecretError::NotFound);
     } else if status != errSecSuccess {
-        return Err(SecretError::PlatformError(
-            "SecItemDelete failed".to_string(),
-        ));
+        return Err(SecretError::PlatformError(format!(
+            "SecItemDelete failed with status: {}",
+            status
+        )));
     }
     Ok(())
 }
@@ -177,9 +182,10 @@ pub fn update(secret: &Secret) -> Result<(), SecretError> {
     if status == errSecItemNotFound {
         return Err(SecretError::NotFound);
     } else if status != errSecSuccess {
-        return Err(SecretError::PlatformError(
-            "SecItemUpdate failed".to_string(),
-        ));
+        return Err(SecretError::PlatformError(format!(
+            "SecItemUpdate failed with status: {}",
+            status
+        )));
     }
     Ok(())
 }
