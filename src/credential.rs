@@ -2,7 +2,7 @@
 //! password, and optional URL).
 //!
 //! The core type is [`Credential`], a plain data holder with getters and
-//! chainable setters.
+//! chainable setters. For ergonomic construction, use [`Credential::builder`].
 
 use serde::{Deserialize, Serialize};
 
@@ -23,12 +23,13 @@ use serde::{Deserialize, Serialize};
 /// ```
 /// use armoire::Credential;
 ///
-/// let credential = Credential::new(
-///     "Example Site".to_string(),
-///     "alice".to_string(),
-///     "hunter2".to_string(),
-///     Some("https://example.com".to_string()),
-/// );
+/// let credential = Credential::builder()
+///     .name("Example Site".to_string())
+///     .username("alice".to_string())
+///     .password("hunter2".to_string())
+///     .url("https://example.com".to_string())
+///     .build()
+///     .unwrap();
 ///
 /// assert_eq!(credential.name(), "Example Site");
 /// assert_eq!(credential.url(), Some("https://example.com"));
@@ -39,6 +40,26 @@ pub struct Credential {
     username: String,
     password: String,
     url: Option<String>,
+}
+
+/// Builder for [`Credential`].
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct CredentialBuilder {
+    name: Option<String>,
+    username: Option<String>,
+    password: Option<String>,
+    url: Option<String>,
+}
+
+/// Errors returned by [`CredentialBuilder::build`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum CredentialBuilderError {
+    /// `name` was not provided.
+    MissingName,
+    /// `username` was not provided.
+    MissingUsername,
+    /// `password` was not provided.
+    MissingPassword,
 }
 
 impl Credential {
@@ -64,6 +85,28 @@ impl Credential {
             password,
             url,
         }
+    }
+
+    /// Creates a [`CredentialBuilder`] for constructing a `Credential` with
+    /// named fields.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use armoire::Credential;
+    ///
+    /// let credential = Credential::builder()
+    ///     .name("Example Site".to_string())
+    ///     .username("alice".to_string())
+    ///     .password("hunter2".to_string())
+    ///     .build()
+    ///     .unwrap();
+    ///
+    /// assert_eq!(credential.name(), "Example Site");
+    /// assert_eq!(credential.url(), None);
+    /// ```
+    pub fn builder() -> CredentialBuilder {
+        CredentialBuilder::default()
     }
 
     /// Returns the credential's name.
@@ -144,6 +187,52 @@ impl Credential {
     }
 }
 
+impl CredentialBuilder {
+    /// Sets the credential name.
+    pub fn name(mut self, name: String) -> Self {
+        self.name = Some(name);
+        self
+    }
+
+    /// Sets the credential username.
+    pub fn username(mut self, username: String) -> Self {
+        self.username = Some(username);
+        self
+    }
+
+    /// Sets the credential password.
+    pub fn password(mut self, password: String) -> Self {
+        self.password = Some(password);
+        self
+    }
+
+    /// Sets the credential URL.
+    pub fn url(mut self, url: String) -> Self {
+        self.url = Some(url);
+        self
+    }
+
+    /// Builds a [`Credential`].
+    ///
+    /// # Errors
+    /// Returns [`CredentialBuilderError`] when a required field was omitted.
+    pub fn build(self) -> Result<Credential, CredentialBuilderError> {
+        let name = self.name.ok_or(CredentialBuilderError::MissingName)?;
+        let username = self
+            .username
+            .ok_or(CredentialBuilderError::MissingUsername)?;
+        let password = self
+            .password
+            .ok_or(CredentialBuilderError::MissingPassword)?;
+        Ok(Credential {
+            name,
+            username,
+            password,
+            url: self.url,
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -160,5 +249,40 @@ mod tests {
         assert_eq!(credential.username(), "username");
         assert_eq!(credential.password(), "password");
         assert_eq!(credential.url(), Some("https://example.com"));
+    }
+
+    #[test]
+    fn builder_with_optional_url() {
+        let credential = Credential::builder()
+            .name("My Credential".to_string())
+            .username("username".to_string())
+            .password("password".to_string())
+            .url("https://example.com".to_string())
+            .build()
+            .unwrap();
+        assert_eq!(credential.name(), "My Credential");
+        assert_eq!(credential.username(), "username");
+        assert_eq!(credential.password(), "password");
+        assert_eq!(credential.url(), Some("https://example.com"));
+    }
+
+    #[test]
+    fn builder_without_optional_url() {
+        let credential = Credential::builder()
+            .name("My Credential".to_string())
+            .username("username".to_string())
+            .password("password".to_string())
+            .build()
+            .unwrap();
+        assert_eq!(credential.url(), None);
+    }
+
+    #[test]
+    fn builder_missing_required_field() {
+        let result = Credential::builder()
+            .name("My Credential".to_string())
+            .password("password".to_string())
+            .build();
+        assert_eq!(result, Err(CredentialBuilderError::MissingUsername));
     }
 }

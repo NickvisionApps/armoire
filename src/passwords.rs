@@ -52,6 +52,7 @@ bitflags! {
 /// characters they contain (e.g. `SPACE`, with one character, is chosen as
 /// often as `LOWERCASE`, with twenty-six).
 ///
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Generator {
     characters: Characters,
 }

@@ -43,4 +43,4 @@ mod credential;
 pub mod passwords;
 pub mod secrets;
 
-pub use credential::Credential;
+pub use credential::{Credential, CredentialBuilder, CredentialBuilderError};
