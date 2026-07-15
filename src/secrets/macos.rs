@@ -90,12 +90,12 @@ pub fn get(name: &str) -> Result<Secret, SecretError> {
         unsafe { CFRetained::from_raw(std::ptr::NonNull::new(result as *mut CFType).unwrap()) };
     let data = unsafe { CFRetained::cast_unchecked::<CFData>(owned) };
     let value = unsafe { std::slice::from_raw_parts(data.byte_ptr(), data.len()).to_vec() };
-    return Ok(Secret {
+    Ok(Secret {
         name: name.to_string(),
         value: String::from_utf8(value).map_err(|_| {
             SecretError::PlatformError("Failed to convert secret value to UTF-8".to_string())
         })?,
-    });
+    })
 }
 
 /// Deletes a secret from the secure credential store by its name.

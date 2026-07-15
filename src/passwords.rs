@@ -57,24 +57,6 @@ pub struct Generator {
 }
 
 impl Generator {
-    /// Creates a new `Generator` configured to draw from all character classes.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use armoire::passwords::{Generator, Characters};
-    /// let generator = Generator::default();
-    /// ```
-    pub fn default() -> Self {
-        Self {
-            characters: Characters::NUMERIC
-                | Characters::LOWERCASE
-                | Characters::UPPERCASE
-                | Characters::SPECIAL
-                | Characters::SPACE,
-        }
-    }
-
     /// Creates a new `Generator` configured to draw from `characters`.
     ///
     /// # Examples
@@ -145,7 +127,27 @@ impl Generator {
                 break;
             }
         }
-        return charset.into_iter().collect();
+        charset.into_iter().collect()
+    }
+}
+
+impl Default for Generator {
+    /// Creates a new `Generator` configured to draw from all character classes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use armoire::passwords::Generator;
+    /// let generator = Generator::default();
+    /// ```
+    fn default() -> Self {
+        Self {
+            characters: Characters::NUMERIC
+                | Characters::LOWERCASE
+                | Characters::UPPERCASE
+                | Characters::SPECIAL
+                | Characters::SPACE,
+        }
     }
 }
 
