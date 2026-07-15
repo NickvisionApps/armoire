@@ -1,4 +1,4 @@
-//! Random password/passphrase generation with configurable character classes.
+//! Random password generation with configurable character classes.
 //!
 //! The core type is [`Generator`], which is configured with a [`Characters`]
 //! bitflag set describing which classes of characters (numeric, lowercase,
@@ -43,8 +43,7 @@ bitflags! {
     }
 }
 
-/// Generates random strings drawn from a configurable set of [`Characters`]
-/// classes.
+/// Generates random strings from a configurable set of [`Characters`] classes.
 ///
 /// Each generated character is chosen by first selecting an enabled class
 /// uniformly at random, then a character uniformly at random from within
@@ -58,7 +57,7 @@ pub struct Generator {
 }
 
 impl Generator {
-    /// Creates a new `Generator` configured to draw from `characters`.
+    /// Creates a generator configured to draw from `characters`.
     ///
     /// # Examples
     ///
@@ -70,7 +69,7 @@ impl Generator {
         Self { characters }
     }
 
-    /// Returns the character classes this generator currently draws from.
+    /// Returns the character classes this generator draws from.
     pub fn characters(&self) -> Characters {
         self.characters
     }
@@ -84,6 +83,8 @@ impl Generator {
     ///
     /// Each character is drawn from the classes enabled on this generator,
     /// with each *class* (not each character) equally likely to be chosen.
+    ///
+    /// Returns an empty string when no character classes are enabled.
     ///
     /// # Examples
     ///
@@ -133,7 +134,7 @@ impl Generator {
 }
 
 impl Default for Generator {
-    /// Creates a new `Generator` configured to draw from all character classes.
+    /// Creates a generator configured to draw from all character classes.
     ///
     /// # Examples
     ///

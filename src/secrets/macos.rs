@@ -1,8 +1,13 @@
+//! macOS backend for [`crate::secrets`], implemented with Keychain APIs.
+//!
+//! This module provides the platform-specific implementations of
+//! [`add`], [`get`], [`remove`], and [`update`].
+//!
 use crate::secrets::{Secret, SecretError};
 use objc2_core_foundation::*;
 use objc2_security::*;
 
-/// Adds a new secret to the system's secure credential store.
+/// Stores a new secret in the system credential store.
 ///
 /// # Errors
 /// - [`SecretError::EmptyValue`] if `secret.value()` is an empty string.
@@ -47,7 +52,7 @@ pub fn add(secret: &Secret) -> Result<(), SecretError> {
     Ok(())
 }
 
-/// Retrieves a secret's value from the secure credential store by its name.
+/// Retrieves a secret from the system credential store by name.
 ///
 /// # Errors
 /// - [`SecretError::NotFound`] if no matching secret exists.
@@ -98,7 +103,7 @@ pub fn get(name: &str) -> Result<Secret, SecretError> {
     })
 }
 
-/// Deletes a secret from the secure credential store by its name.
+/// Removes a secret from the system credential store by name.
 ///
 /// # Errors
 /// - [`SecretError::NotFound`] if no matching secret exists.
@@ -132,10 +137,10 @@ pub fn remove(name: &str) -> Result<(), SecretError> {
     Ok(())
 }
 
-/// Updates the value of an existing secret in the secure credential store.
+/// Updates an existing secret in the system credential store.
 ///
 /// This does *not* create a new secret if one doesn't already exist — use
-/// [`upsert`] for that behavior.
+/// [`crate::secrets::upsert`] for that behavior.
 ///
 /// # Errors
 /// - [`SecretError::EmptyValue`] if `secret.value()` is an empty string.

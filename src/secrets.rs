@@ -1,5 +1,5 @@
-//! Secure storage of secrets (name/value pairs) using the operating
-//! system's native credential store.
+//! Secure storage of secret name/value pairs using the operating system's
+//! native credential store.
 //!
 //! This module selects a platform-specific backend at compile time:
 //!
@@ -10,10 +10,10 @@
 //! - **Linux** — [Secret Service](https://specifications.freedesktop.org/secret-service/latest/)
 //!   via the `linux` submodule.
 //!
-//! Only the backend matching the target OS is compiled in; its public
-//! items are re-exported directly from this module, so callers can use
-//! e.g. `armoire::secrets::store` (or whatever the backend exposes)
-//! without needing to know which platform module it came from.
+//! Only the backend matching the target OS is compiled in. Its public items
+//! are re-exported from this module, so callers can use
+//! `armoire::secrets::{add, get, remove, update}` without caring which
+//! platform module provides the implementation.
 //!
 //! The [`Secret`] type itself is a plain, platform-independent
 //! name/value pair used as the common data structure passed to and
@@ -47,7 +47,7 @@ pub use macos::*;
 #[cfg(target_os = "windows")]
 pub use windows::*;
 
-/// A named secret value, e.g. an API key or token, to be stored in or
+/// A named secret value (for example, an API key or token) to be stored in or
 /// retrieved from the platform's native credential store.
 ///
 /// `Secret` is a plain data holder; reading from and writing to the
@@ -143,7 +143,7 @@ impl Secret {
     }
 }
 
-/// Generates a random 64-character password and stores it in the secure
+/// Generates a random 64-character value and stores it in the secure
 /// credential store under the given `name`.
 ///
 /// # Errors

@@ -29,7 +29,7 @@ use serde::{Deserialize, Serialize};
 ///     .password("hunter2".to_string())
 ///     .url("https://example.com".to_string())
 ///     .build()
-///     .unwrap();
+///     .expect("all required fields are set");
 ///
 /// assert_eq!(credential.name(), "Example Site");
 /// assert_eq!(credential.url(), Some("https://example.com"));
@@ -66,6 +66,9 @@ impl Credential {
     /// Creates a new `Credential` with the given `name`, `username`,
     /// `password`, and optional `url`.
     ///
+    /// Prefer [`Credential::builder`] when constructing credentials at call
+    /// sites where named fields read better than positional arguments.
+    ///
     /// # Examples
     ///
     /// ```
@@ -100,7 +103,7 @@ impl Credential {
     ///     .username("alice".to_string())
     ///     .password("hunter2".to_string())
     ///     .build()
-    ///     .unwrap();
+    ///     .expect("all required fields are set");
     ///
     /// assert_eq!(credential.name(), "Example Site");
     /// assert_eq!(credential.url(), None);
@@ -189,24 +192,32 @@ impl Credential {
 
 impl CredentialBuilder {
     /// Sets the credential name.
+    ///
+    /// This field is required.
     pub fn name(mut self, name: String) -> Self {
         self.name = Some(name);
         self
     }
 
     /// Sets the credential username.
+    ///
+    /// This field is required.
     pub fn username(mut self, username: String) -> Self {
         self.username = Some(username);
         self
     }
 
     /// Sets the credential password.
+    ///
+    /// This field is required.
     pub fn password(mut self, password: String) -> Self {
         self.password = Some(password);
         self
     }
 
     /// Sets the credential URL.
+    ///
+    /// This field is optional.
     pub fn url(mut self, url: String) -> Self {
         self.url = Some(url);
         self

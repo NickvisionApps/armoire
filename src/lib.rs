@@ -1,10 +1,11 @@
-//! Armoire is a small library for managing credentials, generating
-//! passwords, and working with secure OS-backed secrets.
+//! Cross-platform utilities for credentials, password generation, and secure
+//! secret storage.
 //!
-//! It provides:
-//! - [`Credential`] for username/password login records
-//! - [`passwords`] for configurable password generation
-//! - [`secrets`] for secure secret storage abstractions
+//! # Modules
+//!
+//! - [`Credential`] and [`CredentialBuilder`] for login records.
+//! - [`passwords`] for configurable random password generation.
+//! - [`secrets`] for OS-backed secret storage APIs.
 //!
 //! # Example
 //!
@@ -16,12 +17,13 @@
 //! };
 //!
 //! fn main() {
-//!     let credential = Credential::new(
-//!         "Example Service".to_string(),
-//!         "alice".to_string(),
-//!         "super-secret-password".to_string(),
-//!         Some("https://example.com/login".to_string()),
-//!     );
+//!     let credential = Credential::builder()
+//!         .name("Example Service".to_string())
+//!         .username("alice".to_string())
+//!         .password("super-secret-password".to_string())
+//!         .url("https://example.com/login".to_string())
+//!         .build()
+//!         .expect("all required credential fields should be present");
 //!
 //!     let generator = Generator::new(
 //!         Characters::LOWERCASE | Characters::UPPERCASE | Characters::NUMERIC,
