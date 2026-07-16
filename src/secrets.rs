@@ -10,19 +10,16 @@
 //! - **Linux** — [Secret Service](https://specifications.freedesktop.org/secret-service/latest/)
 //!   via the `linux` submodule.
 //!
-//! Only the backend matching the target OS is compiled in. Its public items
-//! are re-exported from this module, so callers can use
-//! `armoire::secrets::{add, get, remove, update}` without caring which
-//! platform module provides the implementation.
+//! Only the backend matching the target OS is compiled in. Public APIs like
+//! [`add`], [`get`], [`remove`], and [`update`] dispatch to that backend.
 //!
 //! The [`Secret`] type itself is a plain, platform-independent
 //! name/value pair used as the common data structure passed to and
 //! returned from the backend.
 //!
-//! # Unsupported platforms
+//! # Platform support
 //!
-//! No backend is compiled in for targets other than Windows, macOS, and
-//! Linux; only [`Secret`] itself is available on those platforms.
+//! Armoire supports Windows, macOS, and Linux targets.
 //!
 //! # Security
 //!
@@ -41,19 +38,17 @@ mod macos;
 mod windows;
 
 #[cfg(target_os = "linux")]
-pub use linux::*;
+use linux::Backend;
 #[cfg(target_os = "macos")]
-pub use macos::*;
+use macos::Backend;
 #[cfg(target_os = "windows")]
-pub use windows::*;
+use windows::Backend;
 
 /// A named secret value (for example, an API key or token) to be stored in or
 /// retrieved from the platform's native credential store.
 ///
 /// `Secret` is a plain data holder; reading from and writing to the
-/// actual OS credential store is handled by the platform-specific
-/// backend re-exported at the top of this module (see the module-level
-/// docs).
+/// actual OS credential store is handled by the selected platform backend.
 ///
 /// # Security
 ///
@@ -107,13 +102,19 @@ pub enum SecretError {
     PlatformError(String),
 }
 
+pub(crate) trait SecretStoreBackend {
+    fn add(secret: &Secret) -> Result<(), SecretError>;
+    fn get(name: &str) -> Result<Secret, SecretError>;
+    fn remove(name: &str) -> Result<(), SecretError>;
+    fn update(secret: &Secret) -> Result<(), SecretError>;
+}
+
 impl Secret {
     /// Creates a new `Secret` with the given `name` and `value`.
     ///
     /// This constructs the in-memory representation only; it does not
-    /// write to the OS credential store. See the platform-specific
-    /// backend functions re-exported from this module for persisting a
-    /// `Secret`.
+    /// write to the OS credential store. Use [`add`], [`update`], or
+    /// [`upsert`] to persist a `Secret`.
     ///
     /// # Examples
     ///
@@ -143,6 +144,16 @@ impl Secret {
     }
 }
 
+/// Stores a new secret in the system credential store.
+///
+/// # Errors
+/// - [`SecretError::EmptyValue`] if `secret.value()` is an empty string.
+/// - [`SecretError::AlreadyExists`] if a secret with the same name already exists.
+/// - [`SecretError::PlatformError`] if the underlying platform API call fails.
+pub fn add(secret: &Secret) -> Result<(), SecretError> {
+    Backend::add(secret)
+}
+
 /// Generates a random 64-character value and stores it in the secure
 /// credential store under the given `name`.
 ///
@@ -152,10 +163,42 @@ impl Secret {
 pub fn create_random(name: &str) -> Result<Secret, SecretError> {
     let generator = passwords::Generator::default();
     let secret = Secret::new(name.to_string(), generator.generate(64));
-    match add(&secret) {
+    match Backend::add(&secret) {
         Ok(_) => Ok(secret),
         Err(e) => Err(e),
     }
+}
+
+/// Retrieves a secret from the system credential store by name.
+///
+/// # Errors
+/// - [`SecretError::NotFound`] if no matching secret exists.
+/// - [`SecretError::PlatformError`] if the underlying platform API call fails
+///   or the stored value is not valid UTF-8.
+pub fn get(name: &str) -> Result<Secret, SecretError> {
+    Backend::get(name)
+}
+
+/// Removes a secret from the system credential store by name.
+///
+/// # Errors
+/// - [`SecretError::NotFound`] if no matching secret exists.
+/// - [`SecretError::PlatformError`] if the underlying platform API call fails.
+pub fn remove(name: &str) -> Result<(), SecretError> {
+    Backend::remove(name)
+}
+
+/// Updates an existing secret in the system credential store.
+///
+/// This does *not* create a new secret if one doesn't already exist — use
+/// [`upsert`] for that behavior.
+///
+/// # Errors
+/// - [`SecretError::EmptyValue`] if `secret.value()` is an empty string.
+/// - [`SecretError::NotFound`] if no secret with this name exists.
+/// - [`SecretError::PlatformError`] if the underlying platform API call fails.
+pub fn update(secret: &Secret) -> Result<(), SecretError> {
+    Backend::update(secret)
 }
 
 /// Updates the secret if it already exists in the secure credential store,
@@ -168,9 +211,9 @@ pub fn create_random(name: &str) -> Result<Secret, SecretError> {
 /// Returns any error from [`update`] or [`add`] other than
 /// `SecretError::NotFound` (which triggers the fallback to `add`).
 pub fn upsert(secret: &Secret) -> Result<(), SecretError> {
-    match update(secret) {
+    match Backend::update(secret) {
         Ok(_) => Ok(()),
-        Err(SecretError::NotFound) => add(secret),
+        Err(SecretError::NotFound) => Backend::add(secret),
         Err(e) => Err(e),
     }
 }
