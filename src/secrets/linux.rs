@@ -40,7 +40,7 @@ impl SecretStoreBackend for Backend {
         password_store_sync(
             Some(get_schema()),
             HashMap::from([("application", secret.name())]),
-            Some(&COLLECTION_DEFAULT),
+            Some(COLLECTION_DEFAULT),
             secret.name(),
             secret.value(),
             gio::Cancellable::NONE,
@@ -81,7 +81,7 @@ impl SecretStoreBackend for Backend {
         password_store_sync(
             Some(get_schema()),
             HashMap::from([("application", secret.name())]),
-            Some(&COLLECTION_DEFAULT),
+            Some(COLLECTION_DEFAULT),
             secret.name(),
             secret.value(),
             gio::Cancellable::NONE,
