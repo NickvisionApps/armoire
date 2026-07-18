@@ -75,17 +75,22 @@ impl Credential {
     /// use armoire::Credential;
     ///
     /// let credential = Credential::new(
-    ///     "Example Site".to_string(),
-    ///     "alice".to_string(),
-    ///     "hunter2".to_string(),
+    ///     "Example Site",
+    ///     "alice",
+    ///     "hunter2",
     ///     None,
     /// );
     /// ```
-    pub fn new(name: String, username: String, password: String, url: Option<String>) -> Self {
+    pub fn new<N: Into<String>, U: Into<String>, P: Into<String>>(
+        name: N,
+        username: U,
+        password: P,
+        url: Option<String>,
+    ) -> Self {
         Credential {
-            name,
-            username,
-            password,
+            name: name.into(),
+            username: username.into(),
+            password: password.into(),
             url,
         }
     }
@@ -136,8 +141,8 @@ impl Credential {
     /// assert_eq!(credential.name(), "New Name");
     /// assert_eq!(credential.username(), "bob");
     /// ```
-    pub fn set_name(&mut self, name: String) -> &mut Self {
-        self.name = name;
+    pub fn set_name<T: Into<String>>(&mut self, name: T) -> &mut Self {
+        self.name = name.into();
         self
     }
 
@@ -150,8 +155,8 @@ impl Credential {
     ///
     /// Returns `&mut Self` to allow chaining multiple setters (see
     /// [`Credential::set_name`] for an example).
-    pub fn set_username(&mut self, username: String) -> &mut Self {
-        self.username = username;
+    pub fn set_username<T: Into<String>>(&mut self, username: T) -> &mut Self {
+        self.username = username.into();
         self
     }
 
@@ -170,8 +175,8 @@ impl Credential {
     ///
     /// Returns `&mut Self` to allow chaining multiple setters (see
     /// [`Credential::set_name`] for an example).
-    pub fn set_password(&mut self, password: String) -> &mut Self {
-        self.password = password;
+    pub fn set_password<T: Into<String>>(&mut self, password: T) -> &mut Self {
+        self.password = password.into();
         self
     }
 
@@ -184,8 +189,8 @@ impl Credential {
     ///
     /// Returns `&mut Self` to allow chaining multiple setters (see
     /// [`Credential::set_name`] for an example).
-    pub fn set_url(&mut self, url: Option<String>) -> &mut Self {
-        self.url = url;
+    pub fn set_url<T: Into<String>>(&mut self, url: Option<T>) -> &mut Self {
+        self.url = url.map(Into::into);
         self
     }
 }
@@ -194,32 +199,32 @@ impl CredentialBuilder {
     /// Sets the credential name.
     ///
     /// This field is required.
-    pub fn name(mut self, name: String) -> Self {
-        self.name = Some(name);
+    pub fn name<T: Into<String>>(mut self, name: T) -> Self {
+        self.name = Some(name.into());
         self
     }
 
     /// Sets the credential username.
     ///
     /// This field is required.
-    pub fn username(mut self, username: String) -> Self {
-        self.username = Some(username);
+    pub fn username<T: Into<String>>(mut self, username: T) -> Self {
+        self.username = Some(username.into());
         self
     }
 
     /// Sets the credential password.
     ///
     /// This field is required.
-    pub fn password(mut self, password: String) -> Self {
-        self.password = Some(password);
+    pub fn password<T: Into<String>>(mut self, password: T) -> Self {
+        self.password = Some(password.into());
         self
     }
 
     /// Sets the credential URL.
     ///
     /// This field is optional.
-    pub fn url(mut self, url: String) -> Self {
-        self.url = Some(url);
+    pub fn url<T: Into<String>>(mut self, url: T) -> Self {
+        self.url = Some(url.into());
         self
     }
 

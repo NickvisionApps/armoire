@@ -123,8 +123,11 @@ impl Secret {
     ///
     /// let secret = Secret::new("api_key".to_string(), "sk-abc123".to_string());
     /// ```
-    pub fn new(name: String, value: String) -> Self {
-        Secret { name, value }
+    pub fn new<N: Into<String>, V: Into<String>>(name: N, value: V) -> Self {
+        Secret {
+            name: name.into(),
+            value: value.into(),
+        }
     }
 
     /// Returns the secret's name.
